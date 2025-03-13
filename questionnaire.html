@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impact du Dirigeant - Diagnostic</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #eef2f7;
+        }
+
+        h1 {
+            color: #1a365d;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #4a5568;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .progress-container {
+            margin-bottom: 3rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #eef2f7;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #3182ce 0%, #63b3ed 100%);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        .section {
+            background: #f8fafc;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: #2d3748;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .question-container {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .question-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question {
+            font-size: 1.1rem;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .options {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option {
+            padding: 1.2rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            border-color: #63b3ed;
+            background: #f7fafc;
+        }
+
+        .option.selected {
+            background: #ebf8ff;
+            border-color: #3182ce;
+            color: #2b6cb0;
+        }
+
+        .score-indicator {
+            margin-left: auto;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid #eef2f7;
+        }
+
+        button {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button.primary {
+            background: linear-gradient(90deg, #3182ce 0%, #63b3ed 100%);
+            color: white;
+        }
+
+        button.secondary {
+            background: #edf2f7;
+            color: #4a5568;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        button:disabled {
+            background: #e2e8f0;
+            color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #email-form {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        input[type="email"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="email"]:focus {
+            border-color: #3182ce;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(49,130,206,0.1);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #2d3748;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Votre impact en tant que dirigeant</h1>
+            <p class="subtitle">Ce diagnostic analyse votre manière de diriger à travers 5 axes clés : la prise de décision, la gestion des équipes, la communication, la vision stratégique et l'adaptabilité face aux défis.</p>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-label">
+                <span>Progression</span>
+                <span id="progress-percentage">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+
+        <div id="questionnaire"></div>
+
+        <div class="navigation">
+            <button class="secondary" id="prevBtn" onclick="previousQuestion()" disabled>Précédent</button>
+            <button class="primary" id="nextBtn" onclick="nextQuestion()">Suivant</button>
+        </div>
+
+        <div id="email-form" class="section">
+            <h2 class="section-title">Télécharger votre rapport personnalisé</h2>
+            <div class="form-group">
+                <label class="form-label" for="email">Adresse email professionnelle</label>
+                <input type="email" id="email" placeholder="votre@email.com" required>
+            </div>
+            <button class="primary" onclick="generatePDF()">Générer le rapport</button>
+        </div>
+    </div>
+    <script src="questionnaire.js"></script>
+</body>
+</html> 
